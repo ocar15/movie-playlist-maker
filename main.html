@@ -2,13 +2,34 @@
 <html>
     <head>
         <link href="styles.css" rel="stylesheet" type="text/css">
+        <script>src="/app.js"</script>
     </head>
     <body>
         <div id="header">
-             <h1>Header</h1>
+             <h1>Movie Playlist Maker</h1>
         </div>
         <div id="body">
-            <div id="content">Content</div>
+            <div id="content">
+                <div id="input">
+                    <h3>input</h3>
+                    <form>
+                        <label>First movie:</label>
+                        <input type="text">
+                        <input type="submit" onclick="testFunction();">
+                    </form>
+                    <form>
+                        <label>Second movie:</label>
+                        <input type="text">
+                    </form>
+                    <form>
+                        <label>Third movie:</label>
+                        <input type="text">
+                    </form>
+                </div>
+                <div id="output">
+                    <h3>output</h3>
+                </div>
+            </div>
         </div>
     </body>
 </html>
