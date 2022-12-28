@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "dotenv": "^16.0.3",
     "spotify-web-api-node": "^5.0.2"
   }
 }

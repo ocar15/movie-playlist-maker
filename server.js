@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
+var spotify = require('./app.js');
 
 http.createServer(function(req, res){
 
