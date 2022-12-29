@@ -1,32 +1,22 @@
-var http = require('http');
-var fs = require('fs');
-var path = require('path');
-var spotify = require('./app.js');
+// const express = require('express')
+import express from 'express';
+import path from 'path';
+import url from 'url';
 
-http.createServer(function(req, res){
+const app = express()
+const port = 3000
+// const path = require('path')
 
-    if(req.url === "/"){
-        fs.readFile("main.html", "UTF-8", function(err, html){
-            res.writeHead(200, {"Content-Type": "text/html"});
-            res.end(html);
-        });
-    }else if(req.url.match("\.css$")){
-        var cssPath = path.join(__dirname, 'public', req.url);
-        var fileStream = fs.createReadStream(cssPath, "UTF-8");
-        res.writeHead(200, {"Content-Type": "text/css"});
-        fileStream.pipe(res);
-    } else if (req.url == '/app.js') {
-        fs.readFile('./app.js', function (err, jsFile) {
-            if (err) {
-                res.send(500, { error: err });
-            }
-            res.writeHeader(200, { "Content-Type": "text/javascript" });
-            res.write(jsFile);
-            res.end();
-        });
-    }else{
-        res.writeHead(404, {"Content-Type": "text/html"});
-        res.end("No Page Found");
-    }
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-}).listen(3000);
+app.use(express.static('public'))
+
+app.get('/', (req, res) => {
+    // res.send('Hello World!')
+    res.sendFile(path.join(__dirname, '/public/main.html'));
+})
+
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
