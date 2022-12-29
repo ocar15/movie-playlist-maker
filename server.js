@@ -15,12 +15,15 @@ http.createServer(function(req, res){
         var fileStream = fs.createReadStream(cssPath, "UTF-8");
         res.writeHead(200, {"Content-Type": "text/css"});
         fileStream.pipe(res);
-
-    }else if(req.url.match("\.png$")){
-        var imagePath = path.join(__dirname, 'public', req.url);
-        var fileStream = fs.createReadStream(imagePath);
-        res.writeHead(200, {"Content-Type": "image/png"});
-        fileStream.pipe(res);
+    } else if (req.url == '/app.js') {
+        fs.readFile('./app.js', function (err, jsFile) {
+            if (err) {
+                res.send(500, { error: err });
+            }
+            res.writeHeader(200, { "Content-Type": "text/javascript" });
+            res.write(jsFile);
+            res.end();
+        });
     }else{
         res.writeHead(404, {"Content-Type": "text/html"});
         res.end("No Page Found");

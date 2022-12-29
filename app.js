@@ -34,3 +34,24 @@ spotifyApi.clientCredentialsGrant().then(
     );
   }
 );
+
+function submitMovies() {
+  // Take movie names from text fields
+  var movieOneName = document.getElementById('movieOneField').value
+  var movieTwoName = document.getElementById('movieTwoField').value
+  var movieThreeName = document.getElementById('movieThreeField').value
+
+  console.log(movieOneName + ", " + movieTwoName + ", " + movieThreeName);
+
+  // Check movie names with database
+
+  // Search for movie soundtracks on Spotify
+
+  // Obtain top 5 movie soundtrack genres
+
+  // Search for top songs by genres, take two from each search
+
+  // Put songs in playlist, embed it
+}
+
+module.exports = { submitMovies };
