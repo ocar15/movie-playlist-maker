@@ -1,22 +1,29 @@
-// const express = require('express')
-import express from 'express';
-import path from 'path';
-import url from 'url';
+var express = require('express')
+var path = require('path')
+var bodyParser = require('body-parser');
+var { submitMovies } = require('./public/app.js')
 
 const app = express()
+const router = express.Router();
 const port = 3000
-// const path = require('path')
-
-const __filename = url.fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 app.use(express.static('public'))
+app.use(express.urlencoded({ extended: false }))
+app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-    // res.send('Hello World!')
+// Submit movie names
+router.get('/', (_req, res) => {
     res.sendFile(path.join(__dirname, '/public/main.html'));
 })
+router.post('/', (req, res) => {
+    // console.log('submitting a form...')
+    // console.log("request", req.body)
+    const movies = [req.body.movieOneField, req.body.movieTwoField]
+    submitMovies(movies)
+})
+
+app.use('/', router);
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`listening on port ${port}`)
 })

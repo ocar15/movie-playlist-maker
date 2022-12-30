@@ -3,7 +3,7 @@
 
 <head>
     <link href="styles.css" rel="stylesheet" type="text/css">
-    <script type="text/javascript" src="./app.js"></script>
+    <!-- <script type="text/javascript" src="./app.js"></script> -->
 </head>
 
 <body>
@@ -14,19 +14,16 @@
         <div id="content">
             <div id="input">
                 <h3>input</h3>
-                <form>
+                <!-- wrap all inputs in a single form element, when the form is submitted, kick off a post action to the node server, add name attributes to input fields so they will get picked up in the params -->
+                <form method="POST" action="/">
                     <label>First movie:</label>
-                    <input id="movieOneField" type="text">
-                </form>
-                <form>
+                    <input id="movieOneField" type="text" name="movieOneField" />
+                    <br>
                     <label>Second movie:</label>
-                    <input id="movieTwoField" type="text">
+                    <input id="movieTwoField" type="text" name="movieTwoField" />
+                    <br>
+                    <input type="submit" id="submitButton" name="Submit" />
                 </form>
-                <form>
-                    <label>Third movie:</label>
-                    <input id="movieThreeField" type="text">
-                </form>
-                <button id="submitButton">Submit</button>
             </div>
             <div id="output">
                 <h3>output</h3>
