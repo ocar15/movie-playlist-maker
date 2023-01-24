@@ -1,4 +1,5 @@
 var SpotifyWebApi = require('spotify-web-api-node')
+var { Node, LinkedList} = require('./classes.js');
 var dotenv = require('dotenv')
 dotenv.config()
 
@@ -56,6 +57,13 @@ function submitMovies(movies) {
       }, function (err) {
         console.error(err);
       });
+
+      groceries = new LinkedList();
+      groceries.add("milk");
+      groceries.add("eggs");
+      groceries.add("cheese")
+      console.log(groceries.size);
+      console.log(groceries.get(0));
 
   }, function (err) {
     console.error(err);

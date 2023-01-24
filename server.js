@@ -1,7 +1,7 @@
 var express = require('express')
 var path = require('path')
 var bodyParser = require('body-parser');
-var { submitMovies } = require('./public/app.js')
+var { submitMovies } = require('./public/app.js');
 
 const app = express()
 const router = express.Router();
