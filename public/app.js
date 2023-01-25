@@ -36,9 +36,9 @@ function submitMovies(movies) {
 
   // Check movie names with database
 
-  var artists = [];
-  var genres = [];
-  var tracks = [];
+  var artists = new LinkedList();
+  var genres = new LinkedList();
+  var tracks = new LinkedList();
 
   // Search for movie soundtracks on Spotify (take the first result for now)
   // for (var i = 0; i < movies.length; i++) {  }
@@ -46,25 +46,41 @@ function submitMovies(movies) {
     console.log('Searching for ' + movies[0]);
     // console.log(data.body.albums);
 
-    var topAlbum = data.body.albums.items[0];
-    console.log("album chosen for '" + movies[0] + "': " + topAlbum.name + " (" + topAlbum.id + ")");
-    console.log("artist chosen:" + topAlbum.artists[0].name);
-    console.log(topAlbum.artists[0].id);
+    var album = data.body.albums.items[0];
+    console.log("album chosen for '" + movies[0] + "': " + album.name + " (" + album.id + ")");
 
-    spotifyApi.getArtist(topAlbum.artists[0].id)
-      .then(function (data) {
-        console.log('Artist information', data.body);
-      }, function (err) {
+    // Based on albums, get tracks (5 per movie)
+    spotifyApi.getAlbumTracks(album.id, { limit : 5}).then(function(data) {
+      console.log("Tracks listed: " + data.body.items.length);
+      for(var i = 0; i < data.body.items.length; i++){
+        tracks.add(data.body.items[i]);
+        console.log('"' + tracks.get(i).name + '"' + " added to artist list (" + tracks.get(i).id + ")");
+      }
+    }, function(err) {
+      console.log(err);
+    });
+
+     // Based on tracks, get artists - CURRENTLY PULLING FROM ALBUM
+    console.log("Artists listed: " + album.artists.length);
+    for(var i = 0; i < album.artists.length; i++){
+      artists.add(album.artists[i])
+      console.log('"' + artists.get(i).name + '"' + " added to artist list (" + artists.get(i).id + ")");
+    }
+
+    // Based on artists, get genres
+    for(var i = 0; i < artists.size; i++){
+      spotifyApi.getArtist(artists.get(i).id).then(function(data) {
+        console.log('Genres listed: ', data.body.genres.length);
+        for(var j = 0; j < data.body.genres.length; j++){
+          genres.add(data.body.genres[j]);
+          console.log('"' + genres.get(j) + '"' + " added to genre list");
+        }
+      }, function(err) {
         console.error(err);
       });
-
-      groceries = new LinkedList();
-      groceries.add("milk");
-      groceries.add("eggs");
-      groceries.add("cheese")
-      console.log(groceries.size);
-      console.log(groceries.get(0));
-
+    }
+   
+    // Get recommendations using seeds
   }, function (err) {
     console.error(err);
   });
