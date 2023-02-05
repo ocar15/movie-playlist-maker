@@ -42,9 +42,9 @@ function submitMovies(movies) {
 
   // Search for movie soundtracks on Spotify (take the first result for now)
   // for (var i = 0; i < movies.length; i++) {  }
-  spotifyApi.searchAlbums(movies[0] + "original motion picture soundtrack").then(function (data) {
+  spotifyApi.searchAlbums(movies[0] + " original motion picture soundtrack").then(function (data) {
     console.log("Searching for '" + movies[0] + "'...");
-    // console.log(data.body.albums);
+    // console.log(data.body.albums.items);
 
     var album = data.body.albums.items[0];
     console.log("Album chosen for search '" + movies[0] + "': " + album.name + " (" + album.id + ")\n");
@@ -94,7 +94,7 @@ function submitMovies(movies) {
 
             var seeds = [seed_tracks, seed_artists, seed_genres];
 
-            getReccs(seeds);
+            // getReccs(seeds);
           }
 
         }, function(err) {
