@@ -27,5 +27,5 @@ router.post('/', (req, res) => {
 app.use('/', router);
 
 app.listen(port, () => {
-    console.log(`listening on port ${port}`)
+    console.log(`Listening on port ${port}`)
 })
