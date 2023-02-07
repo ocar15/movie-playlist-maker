@@ -77,24 +77,26 @@ function submitMovies(movies) {
           // Check if current artist's name matches the artistList tail's name
           if(data.body.name == artistList.tail.data.name){
             console.log("\nGetting recommendations...")
+
+            // Transfer from linked lists to arrays - ADJUST THIS TO BE BUILT INTO THE LINKED LIST CLASS PLEASE
             var seed_tracks = [];
-            for(var k = 0; i < trackList.length; i++){
-              seed_tracks.push(trackList.get(k).id);
+            for (var k = 0; k < trackList.size; k++) {
+              seed_tracks[k] = trackList.get(k).id;
             }
 
-            var seed_artists = [];
-            for(var k = 0; i < artistList.length; i++){
-              seed_artists.push(artistList.get(k).id);
+            // var seed_genres = [];
+            // for (var k = 0; k < genreList.size; k++) {
+            //   seed_genres[k] = genreList.get(k);
+            // }
+            var seed_genres = "";
+            for (var k = 0; k < genreList.size; k++) {
+              seed_genres = seed_genres.concat(genreList.get(k) + ",");
             }
 
-            var seed_genres = [];
-            for(var k = 0; i < genreList.length; i++){
-              seed_albums.push(genreList.get(k).id);
-            }
+            var seeds = [seed_tracks, seed_genres];
+            console.log(seed_genres)
 
-            var seeds = [seed_tracks, seed_artists, seed_genres];
-
-            // getReccs(seeds);
+            getReccs(seeds);
           }
 
         }, function(err) {
@@ -117,15 +119,17 @@ function submitMovies(movies) {
 }
 
 function getReccs(seeds){
-  // Transfer from linked lists to arrays - ADJUST THIS TO BE BUILT INTO THE LINKED LIST CLASS PLEASE
+  console.log(seeds[0]);
+  console.log(seeds[1]);
+
   spotifyApi.getRecommendations({
-    seed_tracks: seeds[0],
-    seed_artists: seeds[1],
-    seed_genres: seeds[2]
+    seed_tracks: seeds[0][0],
+    seed_genres: seeds[1],
+    limit: 5
   })
   .then(function(data) {
-    let recommendations = data.body;
-    console.log(recommendations);
+    let recommendations = data.body.tracks;
+    // console.log(recommendations);
   }, function(err) {
     console.log(err);
   });
