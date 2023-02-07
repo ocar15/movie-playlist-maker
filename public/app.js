@@ -28,95 +28,98 @@ spotifyApi.clientCredentialsGrant().then(
   }
 );
 
-function submitMovies(movies) {
-  for(var loop = 0; loop < movies.length; loop++){
-    console.log("Movies: " + movies + "\n");
+async function submitMovies(movies){
+  for(let i = 0; i < movies.length; i++){
+    await getSeeds(movies[i]);
+  }
+}
 
-    // Check that both movies were submitted properly
+function getSeeds(movie) {
+  console.log("Movies: " + movie + "\n");
 
-    // Check movie names with database
+  // Check that both movies were submitted properly
 
-    var artistList = new LinkedList();
-    var genreList = new LinkedList();
-    var trackList = new LinkedList();
+  // Check movie names with database
 
-    // Search for movie soundtracks on Spotify (take the first result for now)
-    // for (var i = 0; i < movies.length; i++) {  }
-    spotifyApi.searchAlbums(movies[0] + " original motion picture soundtrack").then(function (data) {
-      console.log("Searching for '" + movies[0] + "'...");
-      // console.log(data.body.albums.items);
+  var artistList = new LinkedList();
+  var genreList = new LinkedList();
+  var trackList = new LinkedList();
 
-      var album = data.body.albums.items[0];
-      console.log("Album chosen for search '" + movies[0] + "': " + album.name + " (" + album.id + ")\n");
+  // Search for movie soundtracks on Spotify (take the first result for now)
+  // for (var i = 0; i < movies.length; i++) {  }
+  spotifyApi.searchAlbums(movie + " original motion picture soundtrack").then(function (data) {
+    console.log("Searching for '" + movie + "'...");
+    // console.log(data.body.albums.items);
 
-      // Based on albums, get tracks (5 per movie)
-      spotifyApi.getAlbumTracks(album.id, {limit: 5}).then(async function(data) {
-        console.log("Getting tracks...");
-        for(var i = 0; i < data.body.items.length; i++){
-          trackList.add(data.body.items[i]);
-          console.log('"' + trackList.get(i).name + '"' + " added to tracks list (" + trackList.get(i).id + ")");
-        }
+    var album = data.body.albums.items[0];
+    console.log("Album chosen for search '" + movie + "': " + album.name + " (" + album.id + ")\n");
 
-        // Based on tracks, get artists
-        console.log("\nGettings artists...");
-        for(var i = 0; i < trackList.size; i++){
-          var repeat = false;
-          for(var k = 0; k < artistList.size; k++){
-            if(artistList.get(k).id === trackList.get(i).artists[0].id){
-              var repeat = true;
-            }
+    // Based on albums, get tracks (5 per movie)
+    spotifyApi.getAlbumTracks(album.id, {limit: 5}).then(async function(data) {
+      console.log("Getting tracks...");
+      for(var i = 0; i < data.body.items.length; i++){
+        trackList.add(data.body.items[i]);
+        console.log('"' + trackList.get(i).name + '"' + " added to tracks list (" + trackList.get(i).id + ")");
+      }
+
+      // Based on tracks, get artists
+      console.log("\nGettings artists...");
+      for(var i = 0; i < trackList.size; i++){
+        var repeat = false;
+        for(var k = 0; k < artistList.size; k++){
+          if(artistList.get(k).id === trackList.get(i).artists[0].id){
+            var repeat = true;
           }
-          if(!repeat){
-            artistList.add(trackList.get(i).artists[0])
-            console.log('"' + artistList.get(i).name + '"' + " added to artist list (" + artistList.get(i).id + ")");
+        }
+        if(!repeat){
+          artistList.add(trackList.get(i).artists[0])
+          console.log('"' + artistList.get(i).name + '"' + " added to artist list (" + artistList.get(i).id + ")");
+        }
+      }
+
+      // Based on artists, get genres
+      console.log("\nGetting genres...");
+      for(var i = 0; i < artistList.size; i++){
+        await spotifyApi.getArtist(artistList.get(i).id).then(function(data) {
+          for(var j = 0; j < data.body.genres.length; j++){
+            genreList.add(data.body.genres[j]);
           }
-        }
+          console.log(data.body.genres.length + " genres added to list (including repeats)");
 
-        // Based on artists, get genres
-        console.log("\nGetting genres...");
-        for(var i = 0; i < artistList.size; i++){
-          await spotifyApi.getArtist(artistList.get(i).id).then(function(data) {
-            for(var j = 0; j < data.body.genres.length; j++){
-              genreList.add(data.body.genres[j]);
-            }
-            console.log(data.body.genres.length + " genres added to list (including repeats)");
+          // On the final loop, get the reccomendations
+          // Check if current artist's name matches the artistList tail's name
+          if(data.body.name == artistList.tail.data.name){
+            console.log("\nGetting recommendations...")
 
-            // On the final loop, get the reccomendations
-            // Check if current artist's name matches the artistList tail's name
-            if(data.body.name == artistList.tail.data.name && loop == 2){
-              console.log("\nGetting recommendations...")
-
-              // Transfer genres from linked list to string - ADJUST THIS TO BE BUILT INTO THE LINKED LIST CLASS PLEASE
-              var seed_genres = "";
-              for (var k = 0; k < 5 && k < genreList.size; k++) {
-                seed_genres = seed_genres.concat(genreList.get(k) + ",");
-              }
-
-              var seeds = [seed_genres];
-
-              getReccs(seeds);
+            // Transfer genres from linked list to string - ADJUST THIS TO BE BUILT INTO THE LINKED LIST CLASS PLEASE
+            var seed_genres = "";
+            for (var k = 0; k < 5 && k < genreList.size; k++) {
+              seed_genres = seed_genres.concat(genreList.get(k) + ",");
             }
 
-          }, function(err) {
-            console.error(err);
-          });
-          
-        }
-        
-        // End get genres
+            var seeds = [seed_genres];
+
+            getReccs(seeds);
+          }
 
         }, function(err) {
-          console.log(err);
+          console.error(err);
         });
-        // End get tracks
+        
+      }
+      
+      // End get genres
 
-
-      }, function (err) {
-        console.error(err);
+      }, function(err) {
+        console.log(err);
       });
+      // End get tracks
+
+
+    }, function (err) {
+      console.error(err);
+    });
   }
-  
-}
 
 function getReccs(seeds){
   console.log(seeds[0]);
@@ -126,7 +129,7 @@ function getReccs(seeds){
     limit: 5
   })
   .then(function(data) {
-    console.log(data.body);
+    // console.log(data.body);
     let recommendations = data.body.tracks;
 
     console.log("\nRecommended songs...")
