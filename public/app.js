@@ -29,13 +29,12 @@ spotifyApi.clientCredentialsGrant().then(
 );
 
 async function submitMovies(movies){
-  for(let i = 0; i < movies.length; i++){
-    await getSeeds(movies[i]);
-  }
+  getSeeds(movies[0]);
+  console.log("This should be LAST");
 }
 
 function getSeeds(movie) {
-  console.log("Movies: " + movie + "\n");
+  console.log("Movie: " + movie + "\n");
 
   // Check that both movies were submitted properly
 
@@ -99,7 +98,7 @@ function getSeeds(movie) {
 
             var seeds = [seed_genres];
 
-            getReccs(seeds);
+            getReccs(seeds)
           }
 
         }, function(err) {
