@@ -82,8 +82,8 @@ function getSeeds(movie) {
         await spotifyApi.getArtist(artistList.get(i).id).then(function(data) {
           for(var j = 0; j < data.body.genres.length; j++){
             genreList.add(data.body.genres[j]);
+            console.log(genreList.get(j) + " added to genre list (potential repeat)");
           }
-          console.log(data.body.genres.length + " genres added to list (including repeats)");
 
           // On the final loop, get the reccomendations
           // Check if current artist's name matches the artistList tail's name
