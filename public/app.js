@@ -29,40 +29,41 @@ spotifyApi.clientCredentialsGrant().then(
 );
 
 async function submitMovies(movies){
-  getSeeds(movies[0]);
-  console.log("This should be LAST");
+
+  var seeds1 = await getSeeds(movies[0]);
+  console.log(seeds1);
+  // var seeds2 = await getSeeds(movies[1]);
+  // console.log(seeds2);
+
+  // var seedList = seeds1.concat(seeds2);
+  // console.log(`seed list: ${seedList}`);
+
 }
 
 function getSeeds(movie) {
   console.log("Movie: " + movie + "\n");
-
-  // Check that both movies were submitted properly
-
-  // Check movie names with database
 
   var artistList = new LinkedList();
   var genreList = new LinkedList();
   var trackList = new LinkedList();
 
   // Search for movie soundtracks on Spotify (take the first result for now)
-  // for (var i = 0; i < movies.length; i++) {  }
   spotifyApi.searchAlbums(movie + " original motion picture soundtrack").then(function (data) {
     console.log("Searching for '" + movie + "'...");
-    // console.log(data.body.albums.items);
 
     var album = data.body.albums.items[0];
-    console.log("Album chosen for search '" + movie + "': " + album.name + " (" + album.id + ")\n");
+    console.log("Album chosen for '" + movie + "': " + album.name + " (" + album.id + ")\n");
 
     // Based on albums, get tracks (5 per movie)
     spotifyApi.getAlbumTracks(album.id, {limit: 5}).then(async function(data) {
-      console.log("Getting tracks...");
+      console.log(`(${movie}) Getting tracks...`);
       for(var i = 0; i < data.body.items.length; i++){
         trackList.add(data.body.items[i]);
         console.log('"' + trackList.get(i).name + '"' + " added to tracks list (" + trackList.get(i).id + ")");
       }
 
       // Based on tracks, get artists
-      console.log("\nGettings artists...");
+      console.log(`\n(${movie}) Gettings artists...`);
       for(var i = 0; i < trackList.size; i++){
         var repeat = false;
         for(var k = 0; k < artistList.size; k++){
@@ -77,7 +78,7 @@ function getSeeds(movie) {
       }
 
       // Based on artists, get genres
-      console.log("\nGetting genres...");
+      console.log(`\n(${movie}) Getting genres...`);
       for(var i = 0; i < artistList.size; i++){
         await spotifyApi.getArtist(artistList.get(i).id).then(function(data) {
           for(var j = 0; j < data.body.genres.length; j++){
@@ -88,23 +89,19 @@ function getSeeds(movie) {
           // On the final loop, get the reccomendations
           // Check if current artist's name matches the artistList tail's name
           if(data.body.name == artistList.tail.data.name){
-            console.log("\nGetting recommendations...")
+            
 
             // Transfer genres from linked list to string - ADJUST THIS TO BE BUILT INTO THE LINKED LIST CLASS PLEASE
             var seed_genres = "";
-            for (var k = 0; k < 5 && k < genreList.size; k++) {
+            for (var k = 0; k < 2 && k < genreList.size; k++) {
               seed_genres = seed_genres.concat(genreList.get(k) + ",");
             }
 
-            var seeds = [seed_genres];
-
-            getReccs(seeds)
+            return seed_genres;
           }
-
         }, function(err) {
           console.error(err);
         });
-        
       }
       
       // End get genres
@@ -120,8 +117,8 @@ function getSeeds(movie) {
     });
   }
 
-function getReccs(seeds){
-  console.log(seeds[0]);
+function getReccs(seeds, movie){
+  console.log(`\n(${movie}) Getting recommendations...`)
 
   spotifyApi.getRecommendations({
     seed_genres: seeds[0],
@@ -131,9 +128,15 @@ function getReccs(seeds){
     // console.log(data.body);
     let recommendations = data.body.tracks;
 
-    console.log("\nRecommended songs...")
+    console.log(`\n(${movie}) Recommended songs...`)
     for(var i = 0; i < recommendations.length; i++){
       console.log(recommendations[i].name);
+    }
+
+    var reccList = [];
+
+    for(var i = 0; i < recommendations.length; i++){
+      reccList[i] = recommendations[i];
     }
   }, function(err) {
     console.log(err);
