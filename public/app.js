@@ -40,7 +40,17 @@ async function submitMovies(movies){
   var finalGenres = `${seeds1[1]},${seeds2[1]}`;
   console.log(`FINAL GENRES: ${finalGenres}`);
 
-  getReccs([finalArtists, finalGenres]);
+  const reccs = await getReccs([finalArtists, finalGenres]);
+
+  // console.log(data.body);
+  let recommendations = reccs.body.tracks;
+
+  console.log("\nRECOMMENDATIONS:")
+  // console.log(recommendations);
+  // Print out each name
+  for(var i = 0; i < recommendations.length; i++){
+    console.log(recommendations[i].name);
+  }
 }
 
 async function getSeeds(movie){
@@ -109,25 +119,12 @@ async function getTracks(album) {
     return spotifyApi.getAlbumTracks(album.id, {limit: 5})
 }
 
-function getReccs(seeds){
-  spotifyApi.getRecommendations({
+async function getReccs(seeds){
+ return spotifyApi.getRecommendations({
     seed_artists: seeds[0],
     seed_genres: seeds[1],
     limit: 10
   })
-  .then(function(data) {
-    // console.log(data.body);
-    let recommendations = data.body.tracks;
-
-    console.log("\nGetting recommendations...")
-    // console.log(recommendations);
-    // Print out each name
-    for(var i = 0; i < recommendations.length; i++){
-      console.log(recommendations[i].name);
-    }
-  }, function(err) {
-    console.log(err);
-  });
 }
 
 module.exports = {
