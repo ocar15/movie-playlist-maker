@@ -29,16 +29,18 @@ spotifyApi.clientCredentialsGrant().then(
 );
 async function submitMovies(movies){
   // Get seeds for movies 1 and 2
+  // seeds[0] is the artist, seeds[1] is the genre
   var seeds1 = await getSeeds(movies[0]);
   var seeds2 = await getSeeds(movies[1]);
 
   // Combine, format
-  var finalSeeds = seeds1.concat(seeds2);
-  finalSeeds = finalSeeds.substring(0, finalSeeds.length-1);
+  var finalArtists = [seeds1[0], seeds2[0]];
+  console.log(`\nFINAL ARTISTS: ${finalArtists}`)
 
-  console.log(`FINAL SEEDS TO BE INPUTTED: ${finalSeeds}`);
+  var finalGenres = `${seeds1[1]},${seeds2[1]}`;
+  console.log(`FINAL GENRES: ${finalGenres}`);
 
-  getReccs(finalSeeds);
+  getReccs([finalArtists, finalGenres]);
 }
 
 async function getSeeds(movie){
@@ -74,13 +76,9 @@ async function getSeeds(movie){
 
   const genreList = await getGenres(tracks, artistList); // you may be able to just delete tracks here, and only pass in the artistList
 
-  // Transfer genres from linked list to string - only can take 2 per movie for now
-  let seed_genres = "";  
-  for (var k = 0; k < 2 && k < genreList.size; k++) {
-    seed_genres = seed_genres.concat(genreList.get(k) + ",");
-  }
+  // Transfer stuff to stuff
   
-  return seed_genres;
+  return [artistList.get(0).id, genreList.get(0)];
 }
 
 async function getAlbum(movie) {
@@ -113,8 +111,8 @@ async function getTracks(album) {
 
 function getReccs(seeds){
   spotifyApi.getRecommendations({
-    seed_artists: [],
-    seed_genres: "glam rock",
+    seed_artists: seeds[0],
+    seed_genres: seeds[1],
     limit: 10
   })
   .then(function(data) {
