@@ -27,116 +27,105 @@ spotifyApi.clientCredentialsGrant().then(
     );
   }
 );
-
 async function submitMovies(movies){
-
+  // Get seeds for movies 1 and 2
   var seeds1 = await getSeeds(movies[0]);
-  console.log(seeds1);
-  // var seeds2 = await getSeeds(movies[1]);
-  // console.log(seeds2);
+  var seeds2 = await getSeeds(movies[1]);
 
-  // var seedList = seeds1.concat(seeds2);
-  // console.log(`seed list: ${seedList}`);
+  // Combine, format
+  var finalSeeds = seeds1.concat(seeds2);
+  finalSeeds = finalSeeds.substring(0, finalSeeds.length-1);
 
+  console.log(`FINAL SEEDS TO BE INPUTTED: ${finalSeeds}`);
+
+  getReccs(finalSeeds);
 }
 
-function getSeeds(movie) {
-  console.log("Movie: " + movie + "\n");
-
+async function getSeeds(movie){
   var artistList = new LinkedList();
-  var genreList = new LinkedList();
   var trackList = new LinkedList();
 
-  // Search for movie soundtracks on Spotify (take the first result for now)
-  spotifyApi.searchAlbums(movie + " original motion picture soundtrack").then(function (data) {
-    console.log("Searching for '" + movie + "'...");
+  const albums = await getAlbum(movie);
 
-    var album = data.body.albums.items[0];
-    console.log("Album chosen for '" + movie + "': " + album.name + " (" + album.id + ")\n");
+  const album = albums.body.albums.items[0];
 
-    // Based on albums, get tracks (5 per movie)
-    spotifyApi.getAlbumTracks(album.id, {limit: 5}).then(async function(data) {
-      console.log(`(${movie}) Getting tracks...`);
-      for(var i = 0; i < data.body.items.length; i++){
-        trackList.add(data.body.items[i]);
-        console.log('"' + trackList.get(i).name + '"' + " added to tracks list (" + trackList.get(i).id + ")");
-      }
+  const tracks = await getTracks(album);
 
-      // Based on tracks, get artists
-      console.log(`\n(${movie}) Gettings artists...`);
-      for(var i = 0; i < trackList.size; i++){
-        var repeat = false;
-        for(var k = 0; k < artistList.size; k++){
-          if(artistList.get(k).id === trackList.get(i).artists[0].id){
-            var repeat = true;
-          }
+  console.log("Getting tracks...");
+  for(var i = 0; i < tracks.body.items.length; i++){
+    trackList.add(tracks.body.items[i]);
+    console.log('"' + trackList.get(i).name + '"' + " added to tracks list (" + trackList.get(i).id + ")");
+  }
+  
+  // Based on tracks, get artists
+  console.log("\nGettings artists...");
+  for(var i = 0; i < trackList.size; i++){
+    var repeat = false;
+    for(var k = 0; k < artistList.size; k++){
+        if(artistList.get(k).id === trackList.get(i).artists[0].id){
+        var repeat = true;
         }
-        if(!repeat){
-          artistList.add(trackList.get(i).artists[0])
-          console.log('"' + artistList.get(i).name + '"' + " added to artist list (" + artistList.get(i).id + ")");
-        }
-      }
-
-      // Based on artists, get genres
-      console.log(`\n(${movie}) Getting genres...`);
-      for(var i = 0; i < artistList.size; i++){
-        await spotifyApi.getArtist(artistList.get(i).id).then(function(data) {
-          for(var j = 0; j < data.body.genres.length; j++){
-            genreList.add(data.body.genres[j]);
-            console.log(genreList.get(j) + " added to genre list (potential repeat)");
-          }
-
-          // On the final loop, get the reccomendations
-          // Check if current artist's name matches the artistList tail's name
-          if(data.body.name == artistList.tail.data.name){
-            
-
-            // Transfer genres from linked list to string - ADJUST THIS TO BE BUILT INTO THE LINKED LIST CLASS PLEASE
-            var seed_genres = "";
-            for (var k = 0; k < 2 && k < genreList.size; k++) {
-              seed_genres = seed_genres.concat(genreList.get(k) + ",");
-            }
-
-            return seed_genres;
-          }
-        }, function(err) {
-          console.error(err);
-        });
-      }
-      
-      // End get genres
-
-      }, function(err) {
-        console.log(err);
-      });
-      // End get tracks
-
-
-    }, function (err) {
-      console.error(err);
-    });
+    }
+    if(!repeat){
+        artistList.add(trackList.get(i).artists[0])
+        console.log('"' + artistList.get(i).name + '"' + " added to artist list (" + artistList.get(i).id + ")");
+    }
   }
 
-function getReccs(seeds, movie){
-  console.log(`\n(${movie}) Getting recommendations...`)
+  const genreList = await getGenres(tracks, artistList); // you may be able to just delete tracks here, and only pass in the artistList
 
+  // Transfer genres from linked list to string - only can take 2 per movie for now
+  let seed_genres = "";  
+  for (var k = 0; k < 2 && k < genreList.size; k++) {
+    seed_genres = seed_genres.concat(genreList.get(k) + ",");
+  }
+  
+  return seed_genres;
+}
+
+async function getAlbum(movie) {
+  console.log("Movie: " + movie + "\n");
+
+  return spotifyApi.searchAlbums(movie + " original motion picture soundtrack")
+}
+
+async function getGenres(_tracks, artistList) {
+    var genreList = new LinkedList();
+    
+    console.log("\nGetting genres...")
+    for(var i = 0; i < artistList.size; i++){
+    //   ********** THIRD CALL TO SPOTIFY API **********
+    await spotifyApi.getArtist(artistList.get(i).id).then(function(data) {
+        for(var j = 0; j < data.body.genres.length; j++){
+        genreList.add(data.body.genres[j]);
+        console.log(genreList.get(j) + " added to genre list (potential repeat)");
+        }
+    })
+  }
+  return genreList;
+}
+
+// Based on albums, get tracks (5 per movie)
+// ********** SECOND CALL TO SPOTIFY API **********
+async function getTracks(album) {
+    return spotifyApi.getAlbumTracks(album.id, {limit: 5})
+}
+
+function getReccs(seeds){
   spotifyApi.getRecommendations({
-    seed_genres: seeds[0],
-    limit: 5
+    seed_artists: [],
+    seed_genres: "glam rock",
+    limit: 10
   })
   .then(function(data) {
     // console.log(data.body);
     let recommendations = data.body.tracks;
 
-    console.log(`\n(${movie}) Recommended songs...`)
+    console.log("\nGetting recommendations...")
+    // console.log(recommendations);
+    // Print out each name
     for(var i = 0; i < recommendations.length; i++){
       console.log(recommendations[i].name);
-    }
-
-    var reccList = [];
-
-    for(var i = 0; i < recommendations.length; i++){
-      reccList[i] = recommendations[i];
     }
   }, function(err) {
     console.log(err);
