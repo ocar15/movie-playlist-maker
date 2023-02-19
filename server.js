@@ -15,11 +15,10 @@ app.use(bodyParser.json());
 router.get('/', (_req, res) => {
     res.sendFile(path.join(__dirname, '/public/main.html'));
 })
-router.post('/', (req, res) => {
-    // console.log('submitting a form...')
-    // console.log("request", req.body)
+router.post('/', async (req, res) => {
     const movies = [req.body.movieOneField, req.body.movieTwoField]
-    submitMovies(movies)
+    const songList = await submitMovies(movies);
+    res.send({songList: songList});
 })
 
 // Return stuff to site
