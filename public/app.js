@@ -14,8 +14,8 @@ var spotifyApi = new SpotifyWebApi({
 // Retrieve an access token
 spotifyApi.clientCredentialsGrant().then(
   function (data) {
-    // console.log('The access token expires in ' + data.body['expires_in']);
-    console.log('Access token: ' + data.body['access_token'] + "\n");
+    console.log('The access token expires in ' + data.body['expires_in']);
+    console.log('The access token is ' + data.body['access_token']);
 
     // Save the access token so that it's used in future calls
     spotifyApi.setAccessToken(data.body['access_token']);
@@ -27,6 +27,7 @@ spotifyApi.clientCredentialsGrant().then(
     );
   }
 );
+
 async function submitMovies(movies){
   // Get seeds for movies 1 and 2
   // seeds[0] is the artist, seeds[1] is the genre
@@ -56,9 +57,9 @@ async function submitMovies(movies){
     songList[i] = recommendations[i].name;
   }
 
-  // const playlist = await makePlaylist(movies[0], movies[1]);
+  //const playlist = await makePlaylist(movies[0], movies[1]);
 
-  // console.log(playlist);
+  //console.log(playlist);
 
   return songList;
 }
