@@ -33,16 +33,16 @@ router.post('/', async (req, res) => {
         const root = parse(html);
 
         const body = root.querySelector('#embedPlaylist');
-        body.set_content(`<h4>${songList[0]}</h4>
-                          <h4>${songList[1]}</h4>
-                          <h4>${songList[2]}</h4>
-                          <h4>${songList[3]}</h4>
-                          <h4>${songList[4]}</h4>
-                          <h4>${songList[5]}</h4>
-                          <h4>${songList[6]}</h4>
-                          <h4>${songList[7]}</h4>
-                          <h4>${songList[8]}</h4>
-                          <h4>${songList[9]}</h4>`);
+        body.set_content(`<h4><a href="${songList[0].external_urls.spotify}">${songList[0].name}<a></h4><br>
+        <h4><a href="${songList[1].external_urls.spotify}" target=”_blank”>${songList[1].name}<a></h4><br>
+        <h4><a href="${songList[2].external_urls.spotify}" target=”_blank”>${songList[2].name}<a></h4><br>
+        <h4><a href="${songList[3].external_urls.spotify}" target=”_blank”>${songList[3].name}<a></h4><br>
+        <h4><a href="${songList[4].external_urls.spotify}" target=”_blank”>${songList[4].name}<a></h4><br>
+        <h4><a href="${songList[5].external_urls.spotify}" target=”_blank”>${songList[5].name}<a></h4><br>
+        <h4><a href="${songList[6].external_urls.spotify}" target=”_blank”>${songList[6].name}<a></h4><br>
+        <h4><a href="${songList[7].external_urls.spotify}" target=”_blank”>${songList[7].name}<a></h4><br>
+        <h4><a href="${songList[8].external_urls.spotify}" target=”_blank”>${songList[8].name}<a></h4><br>
+        <h4><a href="${songList[9].external_urls.spotify}" target=”_blank”>${songList[9].name}<a></h4><br>`);
         res.send(root.toString());
     });
 })

@@ -46,15 +46,14 @@ async function submitMovies(movies){
   // console.log(data.body);
   let recommendations = reccs.body.tracks;
 
-  // temp for testing
   const songList = [];
 
   console.log("\nRECOMMENDATIONS:")
   // console.log(recommendations);
   // Print out each name
   for(var i = 0; i < recommendations.length; i++){
-    console.log(recommendations[i].name);
-    songList[i] = recommendations[i].name;
+    console.log(recommendations[i]);
+    songList[i] = recommendations[i];
   }
 
   //const playlist = await makePlaylist(movies[0], movies[1]);
