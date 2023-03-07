@@ -74,11 +74,12 @@ router.post('/save', async (req, res) => {
         }))
 });
 
-router.get('/callback/', async (req, _res) => {
+router.get('/callback/', async (req, res) => {
     const authCode = req.query.code;
 
     console.log("Login complete. authCode = " + authCode.substring(0, 20) + "...");
-    const playList = await makePlaylist(authCode, movies[0], movies[1], songList);
+    await makePlaylist(authCode, movies[0], movies[1], songList);
+    
 })
 
 app.use('/', router);

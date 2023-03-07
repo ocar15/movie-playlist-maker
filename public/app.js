@@ -146,7 +146,6 @@ async function makePlaylist(authCode, movie1, movie2, songList) {
       spotifyApi.setAccessToken(data.body['access_token']);
 
       const playlist = await genPlaylist(movie1, movie2);
-      console.log(songList[0])
       spotifyApi.addTracksToPlaylist(playlist.body.id, [songList[0].uri, songList[1].uri, songList[2].uri, songList[3].uri, songList[4].uri, songList[5].uri, songList[6].uri, songList[7].uri, songList[8].uri, songList[9].uri])
         .then(function (data) {
           console.log('Tracks added to playlist. Thank you for joinging me on this crazy crazy ride.');
