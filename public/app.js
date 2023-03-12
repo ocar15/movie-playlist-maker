@@ -7,7 +7,7 @@ dotenv.config()
 // https://github.com/thelinmichael/spotify-web-api-node
 
 var spotifyApi = new SpotifyWebApi({
-  clientId: '2332c3ac081e420499643a4648c2170c',
+  clientId: '0037f498f24f4c5786db8948c2db3d5b',
   clientSecret: process.env.MYAPIKEY,
   redirectUri: 'http://localhost:3000/callback/'
 });
@@ -74,6 +74,7 @@ async function getSeeds(movie){
   console.log("Getting tracks...");
   for(var i = 0; i < tracks.body.items.length; i++){
     trackList.add(tracks.body.items[i]);
+    console.log(tracks.body.items[i])
     console.log('"' + trackList.get(i).name + '"' + " added to tracks list (" + trackList.get(i).id + ")");
   }
   
