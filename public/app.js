@@ -14,7 +14,7 @@ var spotifyApi = new SpotifyWebApi({
 // Retrieve an access token
 spotifyApi.clientCredentialsGrant().then(
   function (data) {
-    // console.log('The access token expires in ' + data.body['expires_in']);
+    console.log('The access token expires in ' + data.body['expires_in']);
     console.log('The access token is ' + data.body['access_token']);
 
     // Save the access token so that it's used in future calls
@@ -28,72 +28,139 @@ spotifyApi.clientCredentialsGrant().then(
   }
 );
 
-function submitMovies(movies) {
-  console.log("movies in the submitMovies function...")
-  console.log(movies)
+async function submitMovies(movies){
+  // Get seeds for movies 1 and 2
+  // seeds[0] is the artist, seeds[1] is the genre
+  var seeds1 = await getSeeds(movies[0]);
+  var seeds2 = await getSeeds(movies[1]);
 
-  // Check that both movies were submitted properly
+  // Combine, format
+  var finalArtists = [seeds1[0], seeds2[0]];
+  console.log(`\nFINAL ARTISTS: ${finalArtists}`)
 
-  // Check movie names with database
+  var finalGenres = `${seeds1[1]},${seeds2[1]}`;
+  console.log(`FINAL GENRES: ${finalGenres}`);
 
-  var artists = new LinkedList();
-  var genres = new LinkedList();
-  var tracks = new LinkedList();
+  const reccs = await getReccs([finalArtists, finalGenres]);
 
-  // Search for movie soundtracks on Spotify (take the first result for now)
-  // for (var i = 0; i < movies.length; i++) {  }
-  spotifyApi.searchAlbums(movies[0]).then(function (data) {
-    console.log('Searching for ' + movies[0]);
-    // console.log(data.body.albums);
+  // console.log(data.body);
+  let recommendations = reccs.body.tracks;
 
-    var album = data.body.albums.items[0];
-    console.log("album chosen for '" + movies[0] + "': " + album.name + " (" + album.id + ")");
+  const songList = [];
 
-    // Based on albums, get tracks (5 per movie)
-    spotifyApi.getAlbumTracks(album.id, { limit : 5}).then(function(data) {
-      console.log("Tracks listed: " + data.body.items.length);
-      for(var i = 0; i < data.body.items.length; i++){
-        tracks.add(data.body.items[i]);
-        console.log('"' + tracks.get(i).name + '"' + " added to artist list (" + tracks.get(i).id + ")");
-      }
-    }, function(err) {
-      console.log(err);
-    });
+  console.log("\nRECOMMENDATIONS:")
+  // console.log(recommendations);
+  // Print out each name
+  for(var i = 0; i < recommendations.length; i++){
+    console.log(recommendations[i].name);
+    songList[i] = recommendations[i];
+  }
 
-     // Based on tracks, get artists - CURRENTLY PULLING FROM ALBUM
-    console.log("Artists listed: " + album.artists.length);
-    for(var i = 0; i < album.artists.length; i++){
-      artists.add(album.artists[i])
-      console.log('"' + artists.get(i).name + '"' + " added to artist list (" + artists.get(i).id + ")");
-    }
+  // Send songs back to server.js
+  return songList;
+}
 
-    // Based on artists, get genres
-    for(var i = 0; i < artists.size; i++){
-      spotifyApi.getArtist(artists.get(i).id).then(function(data) {
-        console.log('Genres listed: ', data.body.genres.length);
-        for(var j = 0; j < data.body.genres.length; j++){
-          genres.add(data.body.genres[j]);
-          console.log('"' + genres.get(j) + '"' + " added to genre list");
+async function getSeeds(movie){
+  var artistList = new LinkedList();
+  var trackList = new LinkedList();
+
+  const albums = await getAlbum(movie);
+
+  const album = albums.body.albums.items[0];
+
+  const tracks = await getTracks(album);
+
+  console.log("Getting tracks...");
+  for(var i = 0; i < tracks.body.items.length; i++){
+    trackList.add(tracks.body.items[i]);
+    console.log(tracks.body.items[i])
+    console.log('"' + trackList.get(i).name + '"' + " added to tracks list (" + trackList.get(i).id + ")");
+  }
+  
+  // Based on tracks, get artists
+  console.log("\nGettings artists...");
+  for(var i = 0; i < trackList.size; i++){
+    var repeat = false;
+    for(var k = 0; k < artistList.size; k++){
+        if(artistList.get(k).id === trackList.get(i).artists[0].id){
+        var repeat = true;
         }
-      }, function(err) {
-        console.error(err);
-      });
     }
-   
-    // Get recommendations using seeds
-  }, function (err) {
-    console.error(err);
-  });
+    if(!repeat){
+        artistList.add(trackList.get(i).artists[0])
+        console.log('"' + artistList.get(i).name + '"' + " added to artist list (" + artistList.get(i).id + ")");
+    }
+  }
 
+  const genreList = await getGenres(tracks, artistList); // you may be able to just delete tracks here, and only pass in the artistList
 
+  // Transfer stuff to stuff
+  
+  return [artistList.get(0).id, genreList.get(0)];
+}
 
-  // Obtain top 5 movie soundtrack genres
+async function getAlbum(movie) {
+  console.log("Movie: " + movie + "\n");
 
-  // Search for top songs by genres, take two from each search
+  return spotifyApi.searchAlbums(movie + " original motion picture soundtrack")
+}
 
-  // Put songs in playlist, embed it
+async function getGenres(_tracks, artistList) {
+    var genreList = new LinkedList();
+    
+    console.log("\nGetting genres...")
+    for(var i = 0; i < artistList.size; i++){
+    //   ********** THIRD CALL TO SPOTIFY API **********
+    await spotifyApi.getArtist(artistList.get(i).id).then(function(data) {
+        for(var j = 0; j < data.body.genres.length; j++){
+        genreList.add(data.body.genres[j]);
+        console.log(genreList.get(j) + " added to genre list (potential repeat)");
+        }
+    })
+  }
+  return genreList;
+}
+
+// Based on albums, get tracks (5 per movie)
+async function getTracks(album) {
+    return spotifyApi.getAlbumTracks(album.id, {limit: 5})
+}
+
+async function getReccs(seeds){
+ return spotifyApi.getRecommendations({
+    seed_artists: seeds[0],
+    seed_genres: seeds[1],
+    limit: 10
+  })
+}
+
+async function makePlaylist(authCode, movie1, movie2, songList) {
+
+  console.log("\nSwapping authCode for token...")
+  spotifyApi
+    .authorizationCodeGrant(authCode)
+    .then(async function (data) {
+      console.log('Retrieved access token', data.body['access_token'].substring(0, 20) + "...");
+
+      // Set the access token
+      spotifyApi.setAccessToken(data.body['access_token']);
+
+      const playlist = await genPlaylist(movie1, movie2);
+      spotifyApi.addTracksToPlaylist(playlist.body.id, [songList[0].uri, songList[1].uri, songList[2].uri, songList[3].uri, songList[4].uri, songList[5].uri, songList[6].uri, songList[7].uri, songList[8].uri, songList[9].uri])
+        .then(function (data) {
+          console.log('Tracks added to playlist. Thank you for joinging me on this crazy crazy ride.');
+        }, function (err) {
+          console.log('Something went wrong!', err);
+        });
+    })
+
+}
+
+async function genPlaylist(movie1, movie2) {
+  console.log("\nCreating playlist on user's account...")
+  return spotifyApi.createPlaylist(`${movie1} + ${movie2}`, { 'description': 'Generated by Movie Playlist Maker', 'public': false });
 }
 
 module.exports = {
-  submitMovies
+  submitMovies, makePlaylist
 }
