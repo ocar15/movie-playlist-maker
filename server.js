@@ -68,7 +68,7 @@ router.post('/save', async (req, res) => {
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
             response_type: 'code',
-            client_id: '2332c3ac081e420499643a4648c2170c',
+            client_id: '0037f498f24f4c5786db8948c2db3d5b',
             scope: 'playlist-modify-private',
             redirect_uri: 'http://localhost:3000/callback/'
         }))
