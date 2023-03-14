@@ -7,7 +7,7 @@ dotenv.config()
 // https://github.com/thelinmichael/spotify-web-api-node
 
 var spotifyApi = new SpotifyWebApi({
-  clientId: '2332c3ac081e420499643a4648c2170c',
+  clientId: '0037f498f24f4c5786db8948c2db3d5b',
   clientSecret: process.env.MYAPIKEY
 });
 
